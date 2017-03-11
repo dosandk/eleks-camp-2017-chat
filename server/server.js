@@ -8,6 +8,11 @@ import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import webpackConfig from '../webpack.config';
 import routes from './routes';
+import http from 'http';
+import soketIo from 'socket.io'
+import dotenv from 'dotenv';
+
+dotenv.load();
 
 passport.use(new Strategy({
     clientID: process.env.CLIENT_ID,
@@ -28,6 +33,8 @@ passport.deserializeUser(function(obj, cb) {
 });
 
 const app = express();
+const httpServer = http.Server(app);
+const io = soketIo(httpServer);
 const port = 3000;
 const compiler = webpack(webpackConfig);
 
@@ -45,4 +52,16 @@ app.use(webpackMiddleware(compiler, {
 
 app.use(webpackHotMiddleware(compiler));
 
-app.listen(port, () => console.log(`Running on localhost:${port}`));
+io.on('connection', socket => {
+  console.log('a user connected');
+
+  socket.on('chat message', msg => {
+    io.emit('chat message', msg);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
+
+httpServer.listen(port, () => console.log(`Running on localhost:${port}`));
