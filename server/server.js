@@ -63,14 +63,14 @@ const httpServer = http.Server(app);
 const io = soketIo(httpServer);
 const port = 3000;
 const MongoStore = connectMongo(session);
-// const sessionStore = new MongoStore({
-//   mongooseConnection: mongoose.connection
-// });
+const sessionStore = new MongoStore({
+  mongooseConnection: mongoose.connection
+});
 
 app.use(bodyParser.json());
 app.use(session({
   secret: 'totallysecret',
-  // store: sessionStore
+  store: sessionStore
 }));
 app.use(passport.initialize());
 app.use(passport.session());
