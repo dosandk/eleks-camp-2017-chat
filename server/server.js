@@ -16,7 +16,7 @@ import soketIo from 'socket.io'
 import User from './models';
 import mongoose from 'mongoose';
 
-mongoose.connect(process.env.MONGODB_URI);
+// mongoose.connect(process.env.MONGODB_URI);
 
 passport.use(new Strategy({
     clientID: process.env.CLIENT_ID,
@@ -67,14 +67,14 @@ const io = soketIo(httpServer);
 const port = 3000;
 const compiler = webpack(webpackConfig);
 const MongoStore = connectMongo(session);
-const sessionStore = new MongoStore({
-  mongooseConnection: mongoose.connection
-});
+// const sessionStore = new MongoStore({
+//   mongooseConnection: mongoose.connection
+// });
 
 app.use(bodyParser.json());
 app.use(session({
   secret: 'totallysecret',
-  store: sessionStore
+  // store: sessionStore
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -88,12 +88,12 @@ app.use(webpackMiddleware(compiler, {
 
 app.use(webpackHotMiddleware(compiler));
 
-io.use(passportSocketIo.authorize({
-  cookieParser: cookieParser,
-  key: 'express.sid',
-  secret: 'totallysecret',
-  store: sessionStore,
-}));
+// io.use(passportSocketIo.authorize({
+//   cookieParser: cookieParser,
+//   key: 'express.sid',
+//   secret: 'totallysecret',
+//   store: sessionStore,
+// }));
 
 io.on('connection', socket => {
   socket.on('chat message', msg => {
