@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import path from 'path';
-import passport from 'passport';
-import { ensureLoggedIn } from 'connect-ensure-login';
-import User from '../models';
+const Router = require('express').Router;
+const path = require('path');
+const passport = require('passport');
+const { ensureLoggedIn } = require('connect-ensure-login');
+const User = require('../models');
 
 const router = Router();
 
@@ -28,12 +28,16 @@ router.get('/login/facebook', passport.authenticate('facebook'));
 router.get('/login/facebook/callback',
   passport.authenticate('facebook', {
     successRedirect : '/',
-    failureRedirect: '/login'
+    failureRedirect: '/fail'
   }),
   (req, res) => {
     res.redirect('/');
   }
 );
+
+router.get('fail', (req, res) => {
+  res.status(401).json({ error: 'Authorization failed' } );
+});
 
 router.get('/profile', ensureLoggedIn(),
   (req, res) => {
@@ -42,4 +46,4 @@ router.get('/profile', ensureLoggedIn(),
   }
 );
 
-export default router;
+module.exports = router;

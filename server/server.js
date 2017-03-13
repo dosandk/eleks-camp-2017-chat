@@ -1,20 +1,17 @@
-import express  from 'express';
-import bodyParser from 'body-parser';
-import session from 'express-session';
-import connectMongo from 'connect-mongo';
-import passport from 'passport';
-import { Strategy } from 'passport-facebook';
-import passportSocketIo from 'passport.socketio';
-import cookieParser from 'cookie-parser';
-import webpack from 'webpack';
-import webpackMiddleware from 'webpack-dev-middleware';
-import webpackHotMiddleware from 'webpack-hot-middleware';
-import webpackConfig from '../webpack.config';
-import routes from './routes';
-import http from 'http';
-import soketIo from 'socket.io'
-import User from './models';
-import mongoose from 'mongoose';
+const express = require('express');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const connectMongo = require('connect-mongo');
+const passport = require('passport');
+const Strategy = require('passport-facebook').Strategy;
+const passportSocketIo = require('passport.socketio');
+const cookieParser = require('cookie-parser');
+const routes = require('./routes');
+const http = require('http');
+const path = require('path');
+const soketIo = require('socket.io');
+const User = require('./models');
+const mongoose = require('mongoose');
 
 mongoose.connect('mongodb://localhost:27017/users');
 
@@ -65,7 +62,6 @@ const app = express();
 const httpServer = http.Server(app);
 const io = soketIo(httpServer);
 const port = 3000;
-const compiler = webpack(webpackConfig);
 const MongoStore = connectMongo(session);
 const sessionStore = new MongoStore({
   mongooseConnection: mongoose.connection
@@ -78,22 +74,27 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.static(path.join(__dirname, '../public/')));
 app.use(routes);
-
-app.use(webpackMiddleware(compiler, {
-  hot: true,
-  publicPath: webpackConfig.output.publicPath,
-  noInfo: true
-}));
-
-app.use(webpackHotMiddleware(compiler));
 
 io.use(passportSocketIo.authorize({
   cookieParser: cookieParser,
   key: 'express.sid',
   secret: 'totallysecret',
   store: sessionStore,
+  success: onAuthorizeSuccess,
+  fail: onAuthorizeFail
 }));
+
+function onAuthorizeSuccess(data, accept){
+  console.log('successful connection to socket.io');
+  accept();
+}
+
+function onAuthorizeFail(data, message, error, accept){
+  console.log('failed connection to socket.io:', message);
+  if (error) accept(new Error(message));
+}
 
 io.on('connection', socket => {
   socket.on('chat message', msg => {

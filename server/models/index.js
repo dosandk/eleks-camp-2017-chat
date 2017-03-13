@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-export default mongoose.model('Users', new mongoose.Schema({
+module.exports = mongoose.model('Users', new mongoose.Schema({
   facebook: {
     id: String,
     token: String,
