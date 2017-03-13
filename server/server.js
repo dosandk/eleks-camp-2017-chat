@@ -13,7 +13,7 @@ const soketIo = require('socket.io');
 const User = require('./models');
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/users');
+mongoose.connect(process.env.MONGODB_URI);
 
 passport.use(new Strategy({
     clientID: process.env.CLIENT_ID,
@@ -63,14 +63,14 @@ const httpServer = http.Server(app);
 const io = soketIo(httpServer);
 const port = 3000;
 const MongoStore = connectMongo(session);
-const sessionStore = new MongoStore({
-  mongooseConnection: mongoose.connection
-});
+// const sessionStore = new MongoStore({
+//   mongooseConnection: mongoose.connection
+// });
 
 app.use(bodyParser.json());
 app.use(session({
   secret: 'totallysecret',
-  store: sessionStore
+  // store: sessionStore
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -84,6 +84,13 @@ io.use(passportSocketIo.authorize({
   store: sessionStore,
   success: onAuthorizeSuccess,
   fail: onAuthorizeFail
+}));
+
+io.use(passportSocketIo.authorize({
+  cookieParser: cookieParser,
+  key: 'express.sid',
+  secret: 'totallysecret',
+  store: sessionStore,
 }));
 
 function onAuthorizeSuccess(data, accept){
