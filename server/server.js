@@ -16,7 +16,7 @@ import soketIo from 'socket.io'
 import User from './models';
 import mongoose from 'mongoose';
 
-mongoose.connect(process.env.MONGO_URL);
+mongoose.connect(process.env.MONGODB_URI);
 
 passport.use(new Strategy({
     clientID: process.env.CLIENT_ID,
