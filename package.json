@@ -4,6 +4,7 @@
   "description": "",
   "main": "sw.js",
   "scripts": {
+    "start": "node ./server/server.js",
     "dev": "nodemon --watch server --exec babel-node --presets es2015,stage-0 ./server/server.js",
     "prod": "node ./server/server.js"
   },
@@ -19,6 +20,7 @@
     "ejs": "^2.5.6",
     "express": "^4.15.2",
     "express-session": "^1.15.1",
+    "mongodb": "^2.2.24",
     "mongoose": "^4.8.6",
     "morgan": "^1.8.1",
     "passport.socketio": "^3.7.0",

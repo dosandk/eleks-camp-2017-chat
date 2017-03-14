@@ -1,7 +1,7 @@
 const Router = require('express').Router;
 const path = require('path');
 const passport = require('passport');
-const { ensureLoggedIn } = require('connect-ensure-login');
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const User = require('../models');
 
 const router = Router();
@@ -41,8 +41,8 @@ router.get('fail', (req, res) => {
 
 router.get('/profile', ensureLoggedIn(),
   (req, res) => {
-    const { user } = req;
-    res.json({ user });
+    // const { user } = req;
+    // res.json({ user });
   }
 );
 
