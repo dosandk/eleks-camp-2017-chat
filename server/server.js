@@ -11,14 +11,17 @@ const http = require('http');
 const path = require('path');
 const soketIo = require('socket.io');
 const User = require('./models');
-// const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-// mongoose.connect(process.env.MONGODB_URI);
+const port = process.env.PORT || 3000;
+const callbackURL = process.env.CALLBACK_URL || `http://localhost:3000/login/facebook/callback`;
+
+mongoose.connect(process.env.MONGODB_URI);
 
 passport.use(new Strategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/login/facebook/callback'
+    callbackURL: callbackURL
   },
   (token, refreshToken, profile, done) => {
     process.nextTick(() => {
@@ -61,16 +64,15 @@ passport.deserializeUser((user, done) => {
 const app = express();
 const httpServer = http.Server(app);
 const io = soketIo(httpServer);
-const port = process.env.PORT || 8000;
-// const MongoStore = connectMongo(session);
-// const sessionStore = new MongoStore({
-//   mongooseConnection: mongoose.connection
-// });
+const MongoStore = connectMongo(session);
+const sessionStore = new MongoStore({
+  mongooseConnection: mongoose.connection
+});
 
 app.use(bodyParser.json());
 app.use(session({
   secret: 'totallysecret',
-  // store: sessionStore
+  store: sessionStore
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -92,16 +94,16 @@ app.use(routes);
 //   secret: 'totallysecret',
 //   // store: sessionStore,
 // }));
-
-function onAuthorizeSuccess(data, accept){
-  console.log('successful connection to socket.io');
-  accept();
-}
-
-function onAuthorizeFail(data, message, error, accept){
-  console.log('failed connection to socket.io:', message);
-  if (error) accept(new Error(message));
-}
+//
+// function onAuthorizeSuccess(data, accept){
+//   console.log('successful connection to socket.io');
+//   accept();
+// }
+//
+// function onAuthorizeFail(data, message, error, accept){
+//   console.log('failed connection to socket.io:', message);
+//   if (error) accept(new Error(message));
+// }
 
 io.on('connection', socket => {
   socket.on('chat message', msg => {
