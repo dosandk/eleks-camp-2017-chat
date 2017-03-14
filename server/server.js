@@ -61,7 +61,7 @@ passport.deserializeUser((user, done) => {
 const app = express();
 const httpServer = http.Server(app);
 const io = soketIo(httpServer);
-const port = 3000;
+const port = process.env.PORT || 8000;
 // const MongoStore = connectMongo(session);
 // const sessionStore = new MongoStore({
 //   mongooseConnection: mongoose.connection
