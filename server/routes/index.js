@@ -6,10 +6,6 @@ const User = require('../models');
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../index.html'));
-});
-
 router.get('/users', (req, res, next) => {
   User.find({}, (err, users) => {
     if (err) return next(err);
@@ -41,8 +37,8 @@ router.get('fail', (req, res) => {
 
 router.get('/profile', ensureLoggedIn(),
   (req, res) => {
-    // const { user } = req;
-    // res.json({ user });
+    const { user } = req;
+    res.json({ user });
   }
 );
 
