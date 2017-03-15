@@ -105,9 +105,12 @@ app.use(routes);
 //   if (error) accept(new Error(message));
 // }
 
-io.on('connection', socket => {
+io
+  .of('/chat')
+  .on('connection', socket => {
   socket.on('chat message', msg => {
-    io.emit('chat message', msg);
+    io.of('chat').emit('my-message', msg);
+    // io.emit('chat message', msg);
   });
 
   socket.on('disconnect', () => {
