@@ -108,10 +108,11 @@ app.use(routes);
 io
   .of('/chat')
   .on('connection', socket => {
-  socket.on('chat message', msg => {
-    io.of('chat').emit('my-message', msg);
-    // io.emit('chat message', msg);
-  });
+    console.log('user connected');
+    socket.on('chat message', msg => {
+      io.of('chat').emit('chat message', msg);
+    }
+  );
 
   socket.on('disconnect', () => {
     console.log('user disconnected');
