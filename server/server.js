@@ -2,64 +2,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const connectMongo = require('connect-mongo');
-const passport = require('passport');
-const Strategy = require('passport-facebook').Strategy;
-const passportSocketIo = require('passport.socketio');
 const cookieParser = require('cookie-parser');
+const cookie = require('cookie');
+const async = require('async');
 const routes = require('./routes');
 const http = require('http');
-const path = require('path');
 const soketIo = require('socket.io');
-const User = require('./models');
+const cors = require('cors');
+
+const User = require('./models/user');
 const mongoose = require('mongoose');
+const config = require('./config');
 
-const port = process.env.PORT || 3000;
-const callbackURL = process.env.CALLBACK_URL || `http://localhost:3000/login/facebook/callback`;
-
-mongoose.connect(process.env.MONGODB_URI);
-
-passport.use(new Strategy({
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: callbackURL
-  },
-  (token, refreshToken, profile, done) => {
-    process.nextTick(() => {
-      User.findOne({'facebook.id': profile.id}, function (err, user) {
-        if (err) {
-          return done(err);
-        }
-
-        if (user) {
-          return done(null, user);
-        } else {
-          const newUser = new User();
-
-          newUser.facebook.id = profile.id;
-          newUser.facebook.token = token;
-          newUser.facebook.name = profile.name.givenName + ' ' + profile.name.familyName;
-          newUser.facebook.email = profile.emails && profile.emails.length ? profile.emails[0].value : '';
-
-          newUser.save(function (err) {
-            if (err) {
-              throw err;
-            }
-
-            return done(null, newUser);
-          });
-        }
-      });
-    })
-  }
-));
-
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
+mongoose.connect(config.mongoURL);
 
 const app = express();
 const httpServer = http.Server(app);
@@ -69,53 +24,99 @@ const sessionStore = new MongoStore({
   mongooseConnection: mongoose.connection
 });
 
-app.use(bodyParser.json());
+app.use(cors({ credentials: true, origin: true }));
+app.use(bodyParser());
+app.use(cookieParser());
 app.use(session({
-  secret: 'totallysecret',
+  secret: config.sessionSecret,
+  cookie: {
+    domain: 'localhost',
+    httpOnly: true,
+    maxAge: new Date(Date.now() + 3600000),
+  },
   store: sessionStore
 }));
-app.use(passport.initialize());
-app.use(passport.session());
+
+app.use(require('./middleware/loadUser'));
 app.use(routes);
 
-// io.use(passportSocketIo.authorize({
-//   cookieParser: cookieParser,
-//   key: 'express.sid',
-//   secret: 'totallysecret',
-//   // store: sessionStore,
-//   success: onAuthorizeSuccess,
-//   fail: onAuthorizeFail
-// }));
-
-// io.use(passportSocketIo.authorize({
-//   cookieParser: cookieParser,
-//   key: 'express.sid',
-//   secret: 'totallysecret',
-//   // store: sessionStore,
-// }));
-//
-// function onAuthorizeSuccess(data, accept){
-//   console.log('successful connection to socket.io');
-//   accept();
-// }
-//
-// function onAuthorizeFail(data, message, error, accept){
-//   console.log('failed connection to socket.io:', message);
-//   if (error) accept(new Error(message));
-// }
-
-io
-  .of('/chat')
-  .on('connection', socket => {
-    console.log('user connected');
-    socket.on('chat message', msg => {
-      io.of('chat').emit('chat message', msg);
+function loadSession(sid, callback) {
+  sessionStore.get(sid, (err, session) => {
+    if (arguments.length === 0) {
+      return callback(null, null);
     }
-  );
 
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+    return callback(null, session)
   });
+}
+
+function loadUser(session, callback) {
+  const { userId } = session;
+
+  if (!userId) {
+    return callback(null, null);
+  }
+
+  User.findById(userId, (err, user) => {
+    if (err) return callback(err);
+
+    if (!user) return callback(null, null);
+
+    callback(null, user);
+  });
+}
+
+io.use((socket, callback) => {
+  const { handshake } = socket;
+
+  handshake.riba = 'riba';
+
+  async.waterfall([
+    callback => {
+      handshake.cookies = cookie.parse(handshake.headers.cookie || '');
+
+      const sid = cookieParser.signedCookie(handshake.cookies['connect.sid'], config.sessionSecret);
+
+      loadSession(sid, callback)
+    },
+    (session, callback) => {
+      if (!session) {
+        return callback('Error: No session');
+      }
+
+      handshake.session = session;
+      loadUser(session, callback);
+    },
+    (user, callback) => {
+      if (!user) {
+        return callback('Error: Anonymous session');
+      }
+
+      handshake.user = user;
+      callback(null);
+    }
+  ], err => {
+    if (!err) {
+      return callback(null, true);
+    }
+
+    callback(err);
+  })
 });
 
-httpServer.listen(port, () => console.log(`Running on localhost:${port}`));
+io
+  .on('connection', socket => {
+    const username = socket.handshake.user.get('username');
+
+    socket.broadcast.emit('join', `${username} joined to chat`);
+
+    socket.on('message', msg => {
+      io.emit('message', `${username}> ${msg}`);
+    });
+
+    socket.on('disconnect', () => {
+      socket.broadcast.emit('leave', `${username} left chat`);
+    });
+});
+
+httpServer.listen(config.port, () => console.log(`Running on localhost:${config.port}`));
