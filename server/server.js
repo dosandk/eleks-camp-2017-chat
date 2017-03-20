@@ -32,7 +32,6 @@ app.use(session({
   resave: true,
   saveUninitialized: true,
   cookie: {
-    domain: 'localhost',
     httpOnly: true,
     maxAge: new Date(Date.now() + 3600000),
   },
