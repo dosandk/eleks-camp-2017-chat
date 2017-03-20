@@ -106,6 +106,9 @@ io
   .on('connection', socket => {
     const username = socket.handshake.user.get('username');
 
+    console.error('connection');
+    console.error('username', username);
+
     socket.broadcast.emit('join', `${username} joined to chat`);
 
     socket.on('message', msg => {

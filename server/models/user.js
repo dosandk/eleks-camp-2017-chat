@@ -48,7 +48,6 @@ shema.statics.authorize = function(username, pass, callback) {
       User.findOne({ username }, callback);
     },
     (user, callback) => {
-      console.error('user', user);
       if (user) {
         if (user.checkPass(pass)) {
           callback(null, user)
