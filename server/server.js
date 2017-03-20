@@ -69,8 +69,6 @@ function loadUser(session, callback) {
 io.use((socket, callback) => {
   const { handshake } = socket;
 
-  handshake.riba = 'riba';
-
   async.waterfall([
     callback => {
       handshake.cookies = cookie.parse(handshake.headers.cookie || '');
