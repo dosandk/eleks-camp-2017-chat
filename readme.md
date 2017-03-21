@@ -12,25 +12,30 @@ If you send credentials for already created user you will be authorized.
 If you send credentials for none existed user, user will be created  
 and you will be authorized.
 
-[POST] http://front-camp-chat.herokuapp.com/login
+[POST] http://front-camp-chat.herokuapp.com/login  
+
 ```
   {
     "username": "your_username",
     "pass": "your_pass"
   }
 ```
+**Note:** Request/Response Content Type: 'application/json' 
 
 ## Sending messages
 
 For sending and receiving messages across sockets  
-is used [Socket.io](https://github.com/socketio/socket.io)
+is used [Socket.io](https://github.com/socketio/socket.io)  
 
-Now server support next types of messages:
+Now server support next types of messages:  
+ 
 * `message` - fires when user sent message
 * `join` - fires when user connected 
-* `disconnect`
+* `leave`  - fires when user left chat
 
-<b>Example</b>:
+**Note:** Request/Response Content Type: 'application/json' 
+
+**Example**:
 ```javascript
   const socket = io.connect(`${DOMAIN_URL}`);
   
