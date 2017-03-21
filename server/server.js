@@ -29,8 +29,9 @@ app.use(bodyParser());
 app.use(cookieParser());
 app.use(session({
   secret: config.sessionSecret,
+  resave: true,
+  saveUninitialized: true,
   cookie: {
-    domain: 'localhost',
     httpOnly: true,
     maxAge: new Date(Date.now() + 3600000),
   },
