@@ -1,14 +1,21 @@
 {
-  "name": "backendless",
+  "name": "chat",
   "version": "1.0.0",
-  "description": "",
-  "main": "sw.js",
+  "description": "Eleks front-camp 2017",
   "scripts": {
     "start": "node ./server/server.js",
     "dev": "nodemon --watch server ./server/server.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dosandk/eleks-camp-2017-chat-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dosandk/eleks-camp-2017-chat-server/issues"
+  },
+  "homepage": "https://github.com/dosandk/eleks-camp-2017-chat-server#readme",
   "keywords": [],
-  "author": "",
+  "author": "Vladimir Shevchuk <dosandkv@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "async": "^2.1.5",

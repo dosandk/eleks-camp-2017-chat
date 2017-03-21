@@ -14,10 +14,10 @@ and you will be authorized.
 
 [POST] http://front-camp-chat.herokuapp.com/login
 ```
-{
+  {
     "username": "your_username",
     "pass": "your_pass"
-}
+  }
 ```
 
 ## Sending messages
@@ -32,19 +32,19 @@ Now server support next types of messages:
 
 <b>Example</b>:
 ```javascript
-    const socket = io.connect(`${DOMAIN_URL}`);
-    
-    socket.on('message', msg => {
-      printMessage(msg);
-    });
-    
-    socket.on('join', msg => {
-      printMessage(msg);
-    });
-    
-    socket.on('leave', msg => {
-      printMessage(msg);
-    });
+  const socket = io.connect(`${DOMAIN_URL}`);
+  
+  socket.on('message', msg => {
+    printMessage(msg);
+  });
+  
+  socket.on('join', msg => {
+    printMessage(msg);
+  });
+  
+  socket.on('leave', msg => {
+    printMessage(msg);
+  });
 ```
 <style>
     html {
