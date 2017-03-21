@@ -7,7 +7,7 @@ const fs = require('fs');
 const router = Router();
 
 router.get('/', function(req, res, next) {
-  const pathToReadme = __dirname + './../../readme.md';
+  const pathToReadme = __dirname + '/../../readme.md';
 
   fs.readFile(pathToReadme, 'utf8', function(err, data) {
     if (err) return next(err);
