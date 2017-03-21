@@ -1,9 +1,20 @@
 const Router = require('express').Router;
-const path = require('path');
 const passport = require('passport');
 const User = require('../models/user');
+const marked = require('marked');
+const fs = require('fs');
 
 const router = Router();
+
+router.get('/', function(req, res, next) {
+  const pathToReadme = __dirname + './../../readme.md';
+
+  fs.readFile(pathToReadme, 'utf8', function(err, data) {
+    if (err) return next(err);
+
+    res.send(marked(data.toString()));
+  });
+});
 
 router.get('/users', (req, res, next) => {
   User.find({}, (err, users) => {
