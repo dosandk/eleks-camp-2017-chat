@@ -110,14 +110,14 @@ io
     console.error('connection');
     console.error('username', username);
 
-    socket.broadcast.emit('join', `${username} joined to chat`);
+    socket.broadcast.emit('join', username);
 
     socket.on('message', msg => {
-      io.emit('message', `${username}> ${msg}`);
+      io.emit('message', msg);
     });
 
     socket.on('disconnect', () => {
-      socket.broadcast.emit('leave', `${username} left chat`);
+      socket.broadcast.emit('leave', username);
     });
 });
 
