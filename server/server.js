@@ -113,7 +113,7 @@ io
     socket.broadcast.emit('join', username);
 
     socket.on('message', msg => {
-      io.emit('message', msg);
+      io.emit('message', { message: msg, username });
     });
 
     socket.on('disconnect', () => {
